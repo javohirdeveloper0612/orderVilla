@@ -1,0 +1,12 @@
+### post request
+POST https://payme.uz/api/p2p.request
+Content-Type: application/json text/plain
+
+{
+  "method": "p2p.request",
+  "params":
+    {
+      "card": "6281d1f8bebe7ab52e0bc4b9",
+      "amount": 100000
+    }
+}

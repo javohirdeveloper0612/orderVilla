@@ -1,4 +1,4 @@
-package com.example.Service;
+package com.example.service;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.util.Button;
 import com.example.util.ButtonName;

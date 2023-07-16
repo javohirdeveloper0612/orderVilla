@@ -1,6 +1,7 @@
 package com.example.myTelegramBot;
 import com.example.admin.controller.AdminMainController;
 import com.example.config.BotConfig;
+import com.example.controller.CallBackQueryController;
 import com.example.controller.MainController;
 import com.example.util.TelegramUsers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,15 +28,18 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private final MainController mainController;
     private final AdminMainController adminMainController;
 
+    private final CallBackQueryController queryController;
+
     @Lazy
     @Autowired
     public MyTelegramBot(BotConfig botConfig,
                          MainController mainController,
-                         AdminMainController adminMainController) {
+                         AdminMainController adminMainController, CallBackQueryController queryController) {
 
         this.botConfig = botConfig;
         this.mainController = mainController;
         this.adminMainController = adminMainController;
+        this.queryController = queryController;
     }
 
     @Override
@@ -51,6 +55,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             if(message.getChatId() == 123456778L){
                 adminMainController.handle(update);
             }
+
+        } else if (update.hasCallbackQuery()) {
+            queryController.handle(update);
 
         }
 

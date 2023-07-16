@@ -1,4 +1,4 @@
-package com.example.Service;
+package com.example.service;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.util.Button;
 import com.example.util.ButtonName;
@@ -7,18 +7,18 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 @Service
-public class DiscountHouseService {
+public class LocationHouseService {
 
     private final MyTelegramBot myTelegramBot;
 
-    public DiscountHouseService(MyTelegramBot myTelegramBot) {
+    public LocationHouseService(MyTelegramBot myTelegramBot) {
         this.myTelegramBot = myTelegramBot;
     }
 
-    public void discountHouse(Message message) {
+    public void locationHouse(Message message) {
 
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                "Discount House ishladi Chegirmalar",
+                "Location bo'limi ishladi",
                 Button.markup(
                         Button.rowList(
                                 Button.row(
@@ -28,6 +28,7 @@ public class DiscountHouseService {
                                 )
                         )
                 )));
+
 
     }
 }
