@@ -4,7 +4,6 @@ import com.example.util.Button;
 import com.example.util.ButtonName;
 import com.example.util.SendMsg;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.objects.Message;
 
 @Service
 public class MainService {
@@ -15,9 +14,9 @@ public class MainService {
         this.myTelegramBot = myTelegramBot;
     }
 
-    public void mainMenu(Message message) {
+    public void mainMenu(Long chatId) {
 
-        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
+        myTelegramBot.send(SendMsg.sendMsg(chatId,
                 "⬇️\n" +
                         "\n" +
                         "*- Выберите нужный вам раздел*",
@@ -28,6 +27,10 @@ public class MainService {
                                 Button.row(
                                         Button.button(ButtonName.orderHouse)
 
+                                ),
+
+                                Button.row(
+                                        Button.button(ButtonName.myOrders)
                                 ),
 
                                 Button.row(

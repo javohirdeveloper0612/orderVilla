@@ -1,67 +1,35 @@
 package com.example.controller;
-import com.example.service.*;
-import com.example.command.*;
+
+
+import com.example.service.BotInstructionHouseService;
+import com.example.service.ButtonCommandService;
+import com.example.service.CommandService;
+import com.example.service.MainService;
 import com.example.util.ButtonName;
 import com.example.util.Step;
 import com.example.util.TelegramUsers;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.objects.Message;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Controller
+@Lazy
+@RequiredArgsConstructor
 public class MainController {
 
     private final List<TelegramUsers> usersList = new ArrayList<>();
-    private final ContactCommand contactCommand;
-    private final HelpCommand helpCommand;
-    private final LocationCommand locationCommand;
-    private final OrderCommand orderCommand;
-    private final CreativeTeamCommand creativeTeamCommand;
     private final MainService mainService;
-    private final DiscountHouseService discountHouseService;
-    private final PhotoAndVideoService photoAndVideoService;
-    private final RulesHouseService rulesHouseService;
-    private final ContactHouseService contactHouseService;
-    private final LocationHouseService locationHouseService;
     private final OrderHouseController orderHouseController;
-    private final InstructionBotCommand instructionBotCommand;
     private final BotInstructionHouseService botInstructionHouseService;
+    private final ButtonCommandService buttonCommandService;
+    private final CommandService commandService;
+    private final MyOrdersController myOrdersController;
 
-    @Lazy
-    @Autowired
-    public MainController(ContactCommand contactCommand,
-                          HelpCommand helpCommand,
-                          LocationCommand locationCommand,
-                          OrderCommand orderCommand,
-                          CreativeTeamCommand creativeTeamCommand,
-                          MainService mainService,
-                          DiscountHouseService discountHouseService,
-                          PhotoAndVideoService photoAndVideoService,
-                          RulesHouseService rulesHouseService,
-                          ContactHouseService contactHouseService,
-                          LocationHouseService locationHouseService,
-                          OrderHouseController orderHouseController,
-                          InstructionBotCommand instructionBotCommand,
-                          BotInstructionHouseService botInstructionHouseService) {
 
-        this.contactCommand = contactCommand;
-        this.helpCommand = helpCommand;
-        this.locationCommand = locationCommand;
-        this.orderCommand = orderCommand;
-        this.creativeTeamCommand = creativeTeamCommand;
-        this.mainService = mainService;
-        this.discountHouseService = discountHouseService;
-        this.photoAndVideoService = photoAndVideoService;
-        this.rulesHouseService = rulesHouseService;
-        this.contactHouseService = contactHouseService;
-        this.locationHouseService = locationHouseService;
-        this.orderHouseController = orderHouseController;
-        this.instructionBotCommand = instructionBotCommand;
-        this.botInstructionHouseService = botInstructionHouseService;
-    }
 
     public void handle(Message message) {
 
@@ -75,81 +43,39 @@ public class MainController {
             switch (text) {
 
                 case "/start" -> {
-                    mainService.mainMenu(message);
+                    mainService.mainMenu(message.getChatId());
                     telegramUsers.setStep(Step.MAIN);
                 }
                 case "/help" -> {
-                    helpCommand.helpComand(message);
+                    commandService.helpComand(message);
                     telegramUsers.setStep(Step.HELPCOMMAND);
                 }
                 case "/order" -> {
-                    orderCommand.orderCommand(message);
+                    commandService.orderCommand(message);
                     telegramUsers.setStep(Step.ORDERCOMMAND);
                 }
                 case "/botinstruction" -> {
-                    instructionBotCommand.instructionBotCommand(message);
+                    commandService.instructionBotCommand(message);
                     telegramUsers.setStep(Step.BOTINSTRUCTIONCOMMAND);
                 }
                 case "/contact" -> {
-                    contactCommand.contactCommand(message);
+                    commandService.contactCommand(message);
                     telegramUsers.setStep(Step.CONTACTCOMMAND);
                 }
                 case "/location" -> {
-                    locationCommand.locationCommand(message);
+                    commandService.locationCommand(message);
                     telegramUsers.setStep(Step.LOCATIONCOMMAND);
                 }
                 case "/creativeteam" -> {
-                    creativeTeamCommand.creativeTeamCommand(message);
+                    commandService.creativeTeamCommand(message);
                     telegramUsers.setStep(Step.CREATIVETEAMCOMMAND);
                 }
             }
 
             //-> Command Step
 
-            if (telegramUsers.getStep().equals(Step.HELPCOMMAND)) {
 
-                if (text.equals(ButtonName.backMainMenu)) {
-                    mainService.mainMenu(message);
-                    telegramUsers.setStep(Step.MAIN);
-                }
-            }
-            if (telegramUsers.getStep().equals(Step.ORDERCOMMAND)) {
-
-                if (text.equals(ButtonName.backMainMenu)) {
-                    mainService.mainMenu(message);
-                    telegramUsers.setStep(Step.MAIN);
-                }
-            }
-            if (telegramUsers.getStep().equals(Step.CONTACTCOMMAND)) {
-
-                if (text.equals(ButtonName.backMainMenu)) {
-                    mainService.mainMenu(message);
-                    telegramUsers.setStep(Step.MAIN);
-                }
-            }
-            if (telegramUsers.getStep().equals(Step.LOCATIONCOMMAND)) {
-
-                if (text.equals(ButtonName.backMainMenu)) {
-                    mainService.mainMenu(message);
-                    telegramUsers.setStep(Step.MAIN);
-                }
-            }
-            if (telegramUsers.getStep().equals(Step.CREATIVETEAMCOMMAND)) {
-
-                if (text.equals(ButtonName.backMainMenu)) {
-                    mainService.mainMenu(message);
-                    telegramUsers.setStep(Step.MAIN);
-                }
-            }
-            if (telegramUsers.getStep().equals(Step.FEATUREBOTCOMMAND)) {
-
-                if (text.equals(ButtonName.backMainMenu)) {
-                    mainService.mainMenu(message);
-                    telegramUsers.setStep(Step.MAIN);
-                }
-            }
-
-            if (telegramUsers.getStep().equals(Step.ORDERHOUSE)){
+            if (telegramUsers.getStep().equals(Step.ORDERHOUSE)) {
                 orderHouseController.handle(message);
                 return;
             }
@@ -163,16 +89,21 @@ public class MainController {
                     telegramUsers.setStep(Step.ORDERHOUSE);
                 }
 
+                case ButtonName.myOrders -> {
+                    myOrdersController.handle(message);
+                    telegramUsers.setStep(Step.MYORDERS);
+                }
+
                 case ButtonName.discountsHouse -> {
-                    discountHouseService.discountHouse(message);
+                    buttonCommandService.discountHouse(message);
                     telegramUsers.setStep(Step.DISCOUNTHOUSE);
                 }
                 case ButtonName.photoAndVideoHouse -> {
-                    photoAndVideoService.photoAndVideoHouse(message);
+                    buttonCommandService.photoAndVideoHouse(message);
                     telegramUsers.setStep(Step.PHOTOANDVIDEOHOUSE);
                 }
                 case ButtonName.rulesHouse -> {
-                    rulesHouseService.rulesHouse(message);
+                    buttonCommandService.rulesHouse(message);
                     telegramUsers.setStep(Step.RULESHOUSE);
                 }
                 case ButtonName.botinstruction -> {
@@ -180,59 +111,19 @@ public class MainController {
                     telegramUsers.setStep(Step.BOTINSTRUCTION);
                 }
                 case ButtonName.contactHouse -> {
-                    contactHouseService.contactHouse(message);
+                    buttonCommandService.contactHouse(message);
                     telegramUsers.setStep(Step.CONTACTHOUSE);
                 }
                 case ButtonName.locationHouse -> {
-                    locationHouseService.locationHouse(message);
+                    buttonCommandService.locationHouse(message);
                     telegramUsers.setStep(Step.LOCATIONHOUSE);
                 }
-            }
-
-            //-> Button Step
-
-            if (telegramUsers.getStep().equals(Step.DISCOUNTHOUSE)) {
-
-                if (text.equals(ButtonName.backMainMenu)) {
-                    mainService.mainMenu(message);
+                case ButtonName.backMainMenu -> {
+                    mainService.mainMenu(message.getChatId());
                     telegramUsers.setStep(Step.MAIN);
                 }
             }
-            if (telegramUsers.getStep().equals(Step.PHOTOANDVIDEOHOUSE)) {
 
-                if (text.equals(ButtonName.backMainMenu)) {
-                    mainService.mainMenu(message);
-                    telegramUsers.setStep(Step.MAIN);
-                }
-            }
-            if (telegramUsers.getStep().equals(Step.RULESHOUSE)) {
-
-                if (text.equals(ButtonName.backMainMenu)) {
-                    mainService.mainMenu(message);
-                    telegramUsers.setStep(Step.MAIN);
-                }
-            }
-            if (telegramUsers.getStep().equals(Step.BOTINSTRUCTION)) {
-
-                if (text.equals(ButtonName.backMainMenu)) {
-                    mainService.mainMenu(message);
-                    telegramUsers.setStep(Step.MAIN);
-                }
-            }
-            if (telegramUsers.getStep().equals(Step.CONTACTHOUSE)) {
-
-                if (text.equals(ButtonName.backMainMenu)) {
-                    mainService.mainMenu(message);
-                    telegramUsers.setStep(Step.MAIN);
-                }
-            }
-            if (telegramUsers.getStep().equals(Step.LOCATIONHOUSE)) {
-
-                if (text.equals(ButtonName.backMainMenu)) {
-                    mainService.mainMenu(message);
-                    telegramUsers.setStep(Step.MAIN);
-                }
-            }
 
         } else if (message.hasContact() && saveUser(message.getChatId()).getStep().equals(Step.ORDERHOUSE)) {
             orderHouseController.handle(message);
@@ -240,14 +131,14 @@ public class MainController {
     }
 
     public TelegramUsers saveUser(Long chatId) {
-        for (TelegramUsers users : usersList) {
-            if (users.getChatId().equals(chatId)) {
-                return users;
-            }
-        }
-        var users = new TelegramUsers();
-        users.setChatId(chatId);
-        usersList.add(users);
-        return users;
+        return usersList.stream()
+                .filter(users -> users.getChatId().equals(chatId))
+                .findFirst()
+                .orElseGet(() -> {
+                    var users = new TelegramUsers();
+                    users.setChatId(chatId);
+                    usersList.add(users);
+                    return users;
+                });
     }
 }

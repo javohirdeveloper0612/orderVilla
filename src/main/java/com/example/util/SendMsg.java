@@ -1,4 +1,5 @@
 package com.example.util;
+
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -6,6 +7,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
@@ -20,7 +22,8 @@ public class SendMsg {
         sendMessage.setParseMode("Markdown");
         return sendMessage;
     }
-    public static SendMessage sendMsg(Long id, String text,Integer messageId) {
+
+    public static SendMessage sendMsg(Long id, String text, Integer messageId) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(id);
         sendMessage.setReplyToMessageId(messageId);
@@ -107,14 +110,6 @@ public class SendMsg {
         return sendMessage;
     }
 
-    public static SendLocation sendLocation(Long chatId, Integer messageId) {
-        SendLocation sendLocation = new SendLocation();
-        sendLocation.setChatId(chatId);
-        sendLocation.setLatitude(41.37607);
-        sendLocation.setLongitude(69.365975);
-        sendLocation.setReplyToMessageId(messageId);
-        return sendLocation;
-    }
 
     public static EditMessageText sendMsgParseEdite(Long chatId, String text, Integer messageId) {
         EditMessageText sendMessage = new EditMessageText();
@@ -126,6 +121,13 @@ public class SendMsg {
     }
 
 
+    public static DeleteMessage deleteMessage(Message message) {
+        DeleteMessage deleteMessage = new DeleteMessage();
+        deleteMessage.setMessageId(message.getMessageId());
+        deleteMessage.setChatId(message.getChatId());
+        return deleteMessage;
+    }
+
     public static DeleteMessage deleteMessage(Long chatId, Integer messageId) {
         DeleteMessage deleteMessage = new DeleteMessage();
         deleteMessage.setMessageId(messageId);
@@ -133,7 +135,7 @@ public class SendMsg {
         return deleteMessage;
     }
 
-    public static EditMessageText editMessage(Long chatId, String text, InlineKeyboardMarkup markup,Integer messageId){
+    public static EditMessageText editMessage(Long chatId, String text, InlineKeyboardMarkup markup, Integer messageId) {
         EditMessageText editMessageText = new EditMessageText();
         editMessageText.setChatId(chatId);
         editMessageText.setMessageId(messageId);

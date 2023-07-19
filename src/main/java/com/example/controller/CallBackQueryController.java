@@ -1,48 +1,41 @@
 package com.example.controller;
 
 
-import com.example.service.MainService;
 import com.example.service.OrderHouseService;
 import com.example.util.Step;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Service
+@Lazy
+@RequiredArgsConstructor
 public class CallBackQueryController {
-
     private final OrderHouseService orderHouseService;
-
     private final OrderHouseController orderHouseController;
-    private final MainService mainService;
-
-    @Lazy
-    public CallBackQueryController(OrderHouseService orderHouseService, OrderHouseController orderHouseController, MainService mainService) {
-        this.orderHouseService = orderHouseService;
-        this.orderHouseController = orderHouseController;
-        this.mainService = mainService;
-    }
 
     public void handle(Update update) {
 
         Message message = update.getCallbackQuery().getMessage();
         String query = update.getCallbackQuery().getData();
 
+        String[] parts = query.split("#");
 
-        switch (query) {
+        switch (parts[0]) {
 
             case "next", "cancel" -> orderHouseService.replyStart(message.getChatId(), message.getMessageId());
-
             case "accept_order_date" -> orderHouseService.getOrderDate(message);
-
-            case "main_menu" -> mainService.mainMenu(message);
-
             case "next_to_phone" -> {
                 orderHouseService.saveOrder(message);
                 orderHouseService.sendPhoneNumber(message);
                 orderHouseController.saveUser(message.getChatId()).setStep(Step.PHONE);
             }
+            case "pay_click" -> orderHouseService.successfullyPayment(message);
+            case "pay_payme" -> orderHouseService.getPayment(message, Long.valueOf(parts[1]));
+            case "step_pay" -> orderHouseService.choosePayment(message, Long.valueOf(parts[1]));
+            case "cancelled_order","main_menu" -> orderHouseService.cancelledOrder(message);
         }
 
 

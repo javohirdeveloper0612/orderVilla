@@ -1,6 +1,7 @@
 package com.example.entity;
 
 import com.example.enums.Payment;
+import com.example.enums.Status;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,6 +34,10 @@ public class OrderHouseEntity {
 
     @Column
     private String smsCode;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
 
     @OneToMany(mappedBy = "order", orphanRemoval = true, cascade = CascadeType.ALL)

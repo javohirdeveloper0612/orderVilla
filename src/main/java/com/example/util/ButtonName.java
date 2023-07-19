@@ -10,4 +10,5 @@ public interface ButtonName {
     String botinstruction = "\uD83D\uDD35  Инструкция бота";
     String contactHouse = "☎️  Телефон для связи";
     String locationHouse = "\uD83D\uDCCD  Адрес местонахождения";
+    String myOrders = "\uD83D\uDCCB Мои заказы";
 }

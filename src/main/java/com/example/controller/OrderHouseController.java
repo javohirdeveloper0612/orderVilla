@@ -1,44 +1,38 @@
 package com.example.controller;
 
+import com.example.entity.OrderDateEntity;
 import com.example.entity.OrderHouseEntity;
+import com.example.enums.Payment;
 import com.example.enums.Status;
+import com.example.modul.Apartment;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.repository.OrderHouseRepository;
 import com.example.service.MainService;
 import com.example.service.OrderHouseService;
 import com.example.util.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Controller
+@Lazy
+@RequiredArgsConstructor
 public class OrderHouseController {
 
     private final OrderHouseService service;
-
     private final MainService mainService;
-
-    private OrderHouseEntity orderHouseEntity;
-
     private final OrderHouseRepository orderHouseRepository;
-
     private final MyTelegramBot myTelegramBot;
 
     private List<TelegramUsers> usersList = new ArrayList<>();
 
-    @Lazy
-    public OrderHouseController(OrderHouseService service, MainService mainService, OrderHouseRepository orderHouseRepository, MyTelegramBot myTelegramBot) {
-        this.service = service;
-        this.mainService = mainService;
-        this.orderHouseRepository = orderHouseRepository;
-        this.myTelegramBot = myTelegramBot;
-    }
+
 
     public void handle(Message message) {
 
@@ -53,7 +47,7 @@ public class OrderHouseController {
                     service.mainMenu(message);
                     step.setStep(Step.MAIN);
                 }
-                case ButtonName.backMainMenu -> mainService.mainMenu(message);
+                case ButtonName.backMainMenu -> mainService.mainMenu(message.getChatId());
 
             }
 
@@ -81,10 +75,14 @@ public class OrderHouseController {
                         return;
                     }
 
+                   List<OrderDateEntity> listOrderDate = orderHouseRepository.findByChatIdLastOrderNotActive(message.getChatId(),Status.NOTACTIVE);
+
                     OrderHouseEntity orderClient = optional.get();
                     orderClient.setFullName(message.getText());
+                    orderClient.setAmount(Apartment.calculatePrice(calculateSum(message,listOrderDate)));
                     orderHouseRepository.save(orderClient);
-                    myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),"WORKING"));
+
+                    showPrice(message, orderClient);
                 }
             }
 
@@ -96,6 +94,29 @@ public class OrderHouseController {
 
     }
 
+    private void showPrice(Message message, OrderHouseEntity order) {
+        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),"Цена вашего заказа: " +order.getAmount(),
+                InlineButton.keyboardMarkup(
+                        InlineButton.rowList(
+                                InlineButton.row(
+                                        InlineButton.button("Я согласен ✅","step_pay#"+order.getId()),
+                                        InlineButton.button("Отмена заказа ❌","cancelled_order")
+                                )
+                        )
+                )));
+    }
+
+    public int calculateSum(Message message,List<OrderDateEntity> list){
+        if (list.isEmpty()) {
+            myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),"Sizning buyurtmalaringiz topilmadi"));
+        }
+        int countOrder=0;
+        for (OrderDateEntity orderDateEntity : list) {
+            countOrder++;
+        }
+        return countOrder;
+    }
+
    public boolean checkSmsCode(Message message) {
         Optional<OrderHouseEntity> optional = orderHouseRepository.findByChatIdOrderByCreatedDate(message.getChatId(),Status.NOTACTIVE);
         if (optional.isEmpty()) {
@@ -104,6 +125,8 @@ public class OrderHouseController {
 
         return message.getText().equals(optional.get().getSmsCode());
     }
+
+
 
     public void sendSmsCode(Message message,String phone) {
 
@@ -121,10 +144,10 @@ public class OrderHouseController {
         SendMessage sendMessage = SendMsg.sendMsgParse(message.getChatId(),
                 "*" + phone + "*" + "**" +
                         "*\n- Пожалуйста, введите проверочный код  ✅*");
-        ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove();
-        replyKeyboardRemove.setRemoveKeyboard(true);
-        sendMessage.setReplyMarkup(replyKeyboardRemove);
+        sendMessage.setReplyMarkup(KeyboardRemove.keyboardRemove());
         myTelegramBot.send(sendMessage);
+
+
     }
 
     public boolean checkPhone(Message message) {
@@ -159,6 +182,27 @@ public class OrderHouseController {
         return users;
     }
 
+
+    public void acceptOrder(Long chatId, Long orderId, Payment payment) {
+        Optional<OrderHouseEntity> optional = orderHouseRepository.findById(orderId);
+        if (optional.isEmpty()) {
+            myTelegramBot.send(SendMsg.sendMsg(chatId,
+                    "Ошибка при заказе, попробуйте еще раз  \uD83D\uDD04"));
+            return;
+        }
+        OrderHouseEntity orderClient = optional.get();
+        orderClient.setStatus(Status.ACTIVE);
+        orderClient.setPayment(payment);
+
+
+        myTelegramBot.send(SendMsg.sendMsg(chatId,
+                "*Ваш заказ принят, наши специалисты свяжутся с вами в ближайшее время  ✅*"));
+
+        orderHouseRepository.save(orderClient);
+
+        mainService.mainMenu(chatId);
+//        sendOrder(orderClient);  adminga habar yuborish uchun tulov haqida !
+    }
 
 }
 

@@ -5,44 +5,38 @@ import com.example.entity.OrderHouseEntity;
 import com.example.enums.Status;
 import com.example.modul.CustomMap;
 import com.example.myTelegramBot.MyTelegramBot;
+import com.example.payme.util.PaymentUtil;
 import com.example.repository.OrderDateRepository;
 import com.example.repository.OrderHouseRepository;
 import com.example.util.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
+@Lazy
+@RequiredArgsConstructor
 public class OrderHouseService {
 
     private final MyTelegramBot myTelegramBot;
-
     private final OrderHouseRepository repository;
-
     private final OrderDateRepository orderDateRepository;
-
-    private Map<Long,OrderHouseEntity> orderHouseMap = new HashMap<>();
-
-    private CustomMap<Long, LocalDate> localDates = new CustomMap<>();
-
-
     private final CalendarUtil calendarUtil;
+    private final PaymentUtil paymentUtil;
+    private final MainService mainService;
+    private final CustomMap<Long, LocalDate> localDates = new CustomMap<>();
 
-    @Lazy
-    public OrderHouseService(MyTelegramBot myTelegramBot, OrderHouseRepository repository, OrderDateRepository orderDateRepository, CalendarUtil calendarUtil) {
-        this.myTelegramBot = myTelegramBot;
-        this.repository = repository;
-        this.orderDateRepository = orderDateRepository;
-        this.calendarUtil = calendarUtil;
-    }
 
+    // instruction bot
     public void mainMenu(Message message) {
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "⬇\uFE0F\n" +
                 "\n" +
@@ -65,6 +59,9 @@ public class OrderHouseService {
         )));
     }
 
+
+    // calendarni chiqrish
+
     public void sendCalendar(Message message, int year, int month) {
 
         EditMessageText editMessageText = new EditMessageText();
@@ -76,10 +73,14 @@ public class OrderHouseService {
         myTelegramBot.send(editMessageText);
     }
 
+
+    // Bu ham calendarni chiqarish
+
+
     public void getDate(Message message, int year, int month, int day) {
         localDates.put(message.getChatId(), LocalDate.of(year, month, day));
 
-        myTelegramBot.send(SendMsg.deleteMessage(message.getChatId(), message.getMessageId()));
+        myTelegramBot.send(SendMsg.deleteMessage(message));
 
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(message.getChatId());
@@ -93,15 +94,16 @@ public class OrderHouseService {
         myTelegramBot.send(sendMessage);
     }
 
+    // tanlagan kunlarini userga korsatish uchun
     public void getOrderDate(Message message) {
 
-        if (localDates.get(message.getChatId()) == null){
+        if (localDates.get(message.getChatId()) == null) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "*Нет даты, которые вы хотите забронировать!*"));
-            replyStart(message.getChatId(),message.getMessageId());
+            replyStart(message.getChatId(), message.getMessageId());
             return;
         }
 
-        myTelegramBot.send(SendMsg.deleteMessage(message.getChatId(), message.getMessageId()));
+        myTelegramBot.send(SendMsg.deleteMessage(message));
 
         List<LocalDate> dateList = RemoveDublicatElementsList.removeDuplicates(localDates.get(message.getChatId()));
 
@@ -128,6 +130,8 @@ public class OrderHouseService {
         )));
     }
 
+    // order tanlangan kunlarni databasega NOTACTIVE qilib saqlab quyish uchun ishlatiladi !
+
     public void saveOrder(Message message) {
         Optional<OrderHouseEntity> optional = repository.findLatestOrdersByChatIdAndStatus
                 (message.getChatId(), Status.NOTACTIVE);
@@ -136,6 +140,7 @@ public class OrderHouseService {
 
         OrderHouseEntity orderClient = new OrderHouseEntity();
         orderClient.setChatId(message.getChatId());
+        orderClient.setStatus(Status.NOTACTIVE);
         orderClient.setVisible(true);
 
         repository.save(orderClient);
@@ -152,10 +157,11 @@ public class OrderHouseService {
     }
 
 
+    // zakaz qilishni boshlagandagi button va mapda tanlagan kunlari qolib ketgan bolsa shularni ham uchirib yuboradi
     public void replyStart(Long chatId, Integer messageId) {
 
 
-        myTelegramBot.send(SendMsg.deleteMessage(chatId, messageId));
+        myTelegramBot.send(SendMsg.deleteMessage(chatId,messageId));
 
         localDates.removeKey(chatId);
 
@@ -173,9 +179,11 @@ public class OrderHouseService {
     }
 
 
-    public void sendPhoneNumber(Message message){
-        myTelegramBot.send(SendMsg.deleteMessage(message.getChatId(),message.getMessageId()));
-        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),"Пожалуйста введите ваш номер телефона! (+998996731741)",ButtonUtil.getContact()));
+    public void sendPhoneNumber(Message message) {
+
+        myTelegramBot.send(SendMsg.deleteMessage(message));
+
+        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "Пожалуйста введите ваш номер телефона! (+998996731741)", ButtonUtil.getContact()));
     }
 
 
@@ -188,4 +196,65 @@ public class OrderHouseService {
     }
 
 
+    public void successfullyPayment(Message message) {
+
+        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "Successfully Payment"));
+    }
+
+
+    //Payme orqali tulov qilish uchun method va payme tulov uchun link generate qilib beradi
+
+    public void getPayment(Message message, Long id) {
+        Optional<OrderHouseEntity> optional = repository.findById(id);
+        if (optional.isEmpty()) {
+            myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "Order not found"));
+            return;
+        }
+        OrderHouseEntity orderClient = optional.get();
+        if (orderClient.getStatus() == Status.ACTIVE) {
+            myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "Order already payed"));
+            return;
+        }
+
+        repository.save(orderClient);
+        InlineKeyboardButton button = new InlineKeyboardButton("▶️ Оплата");
+        button.setUrl(paymentUtil.generatePaymentUrl(id, orderClient.getPhone(), orderClient.getAmount()));
+        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
+                "*⬇️ Произведите оплату, перейдя по ссылке ниже и нажмите кнопку ✅ Проверить:*",
+                InlineButton.keyboardMarkup(InlineButton.rowList(
+                        InlineButton.row(button)
+                )))
+
+        );
+    }
+
+
+    // Tulov turini tanlash uchun method
+
+    public void choosePayment(Message message, Long orderId) {
+
+        myTelegramBot.send(SendMsg.deleteMessage(message.getChatId(),message.getMessageId()));
+
+        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "Выберите тип оплаты: ",
+                InlineButton.keyboardMarkup(
+                        InlineButton.rowList(
+                                InlineButton.row(InlineButton.button("\uD83D\uDCB3 Payme", "pay_payme#" + orderId)),
+                                InlineButton.row(InlineButton.button("\uD83D\uDCB3 Click", "pay_click")),
+                                InlineButton.row(InlineButton.button(ButtonName.backMainMenu, "main_menu"))
+                        )
+                )));
+    }
+
+    public void cancelledOrder(Message message) {
+
+        myTelegramBot.send(SendMsg.deleteMessage(message));
+
+        Optional<OrderHouseEntity> optional = repository.findLatestOrdersByChatIdAndStatus(message.getChatId(), Status.NOTACTIVE);
+
+        if (optional.isEmpty())
+            myTelegramBot.send(SendMsg.sendMsg(1024661500L, "Nimadi Xatolik chiqdi" + message.getChatId() + "Shu Idli foydalanuvchi tamondan"));
+        else
+            repository.delete(optional.get());
+        mainService.mainMenu(message.getChatId());
+    }
 }
