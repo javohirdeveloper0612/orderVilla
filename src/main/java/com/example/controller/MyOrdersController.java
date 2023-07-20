@@ -6,6 +6,9 @@ import com.example.enums.Status;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.repository.OrderDateRepository;
 import com.example.repository.OrderHouseRepository;
+import com.example.util.Button;
+import com.example.util.ButtonName;
+import com.example.util.InlineButton;
 import com.example.util.SendMsg;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -20,29 +23,38 @@ public class MyOrdersController {
     private final OrderHouseRepository repository;
     private final OrderDateRepository orderDateRepository;
 
-    public void handle(Message message){
-        List<OrderHouseEntity> list = repository.findByChatIdAndStatus(message.getChatId(), Status.ACTIVE);
+    public void handle(Long chatId){
+        List<OrderHouseEntity> list = repository.findByChatIdAndStatus(chatId, Status.ACTIVE);
         if (list.isEmpty()){
-            myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),"Заказов не найдено \uD83E\uDD37\u200D♂\uFE0F"));
+            myTelegramBot.send(SendMsg.sendMsg(chatId,"Заказов не найдено \uD83E\uDD37\u200D♂\uFE0F"));
         }
 
         StringBuffer stringBuffer = new StringBuffer();
 
         for (OrderHouseEntity orderHouseEntity : list) {
-            stringBuffer.append("\t\t\t\uD83D\uDCCB Ваши заказы: \n\n\n");
-            stringBuffer.append("\uD83D\uDC64 Имя и фамилия: "+orderHouseEntity.getFullName());
-            stringBuffer.append("\n\n☎\uFE0F Номер телефона: "+orderHouseEntity.getPhone());
-            stringBuffer.append("\n\n\uD83D\uDCC5 День, когда был сделан заказ: "+orderHouseEntity.getCreatedDate());
-            stringBuffer.append("\n\n\uD83D\uDCB0 Цена: "+orderHouseEntity.getAmount());
-            stringBuffer.append("\n\n\uD83D\uDDD3\uFE0F Список заказанных дней: \n\n");
-            List<OrderDateEntity> dateList = orderDateRepository.findAllByOrder(orderHouseEntity);
+            stringBuffer.append("\uD83D\uDC64 Заказчик: ").append(orderHouseEntity.getFullName());
+            stringBuffer.append("\n☎\uFE0F Номер телефона: ").append(orderHouseEntity.getPhone());
+            stringBuffer.append("\n\uD83D\uDCC5 Дата заказа: ").append(orderHouseEntity.getCreatedDate());
+            stringBuffer.append("\n\uD83D\uDCB0 Стоимость: ").append(orderHouseEntity.getAmount());
+            stringBuffer.append("\n\n\uD83D\uDDD3\uFE0F Список заказанных дней: \n");
+            List<OrderDateEntity> dateList = orderDateRepository.findAllByOrderAndStatus(orderHouseEntity,Status.ACTIVE);
             if (dateList != null){
+                stringBuffer.append("-------------------------------\n");
                 for (OrderDateEntity orderDateEntity : dateList) {
-                    stringBuffer.append("\t\t\t \uD83D\uDCC6 "+orderDateEntity.getDate() + "\n\n");
+                        stringBuffer.append("|\t\t\t \uD83D\uDCC6 ").append(orderDateEntity.getDate()).append("\t\t\t\t|\n");
                 }
+                stringBuffer.append("--------------------------------\n\n");
             }
+            stringBuffer.append("\t\t\t\t\uD83D\uDCCB Ваши заказы");
 
-            myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), String.valueOf(stringBuffer)));
+            myTelegramBot.send(SendMsg.sendMsg(chatId, String.valueOf(stringBuffer),
+                    Button.markup(
+                            Button.rowList(
+                                    Button.row(
+                                            Button.button(ButtonName.backMainMenu)
+                                    )
+                            )
+                    )));
         }
     }
 }

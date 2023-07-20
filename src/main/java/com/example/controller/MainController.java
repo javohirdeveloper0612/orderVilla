@@ -90,7 +90,7 @@ public class MainController {
                 }
 
                 case ButtonName.myOrders -> {
-                    myOrdersController.handle(message);
+                    myOrdersController.handle(message.getChatId());
                     telegramUsers.setStep(Step.MYORDERS);
                 }
 

@@ -30,7 +30,7 @@ public class MerchantController {
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.equals(paycomAuthorization)) {
             System.out.println(authorization);
-            return ResponseEntity.ok(new Error(new Exception(-32504, "authorization faile", "authorization")));
+            return ResponseEntity.ok(new Error(new Exception(-32504, "authorization failed", "authorization")));
         }
         try {
             String json = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));

@@ -31,7 +31,7 @@ public class MerchantService implements IMerchantService {
     private static final Long time_expired = 43_200_000L;
     private final OrderHouseRepository orderRepository;
     private final TransactionRepository transactionRepository;
-    private final OrderHouseController transportUslugaController;
+    private final OrderHouseController orderHouseController;
 
     @Override
     public CheckPerformTransactionResult checkPerformTransaction(CheckPerformTransaction checkPerformTransaction) {
@@ -47,9 +47,9 @@ public class MerchantService implements IMerchantService {
         if (orderClient.getStatus().equals(Status.ACTIVE)) {
             throw new OrderAlreadyPayed("invoice already paid/cancelled");
         }
-        return new CheckPerformTransactionResult(true, new DetailResult(0, List.of(new Item("10107002001000000",
-                "Услуги по перевозке грузов автомобильным транспортом",
-                orderClient.getAmount(), 1, "1209885", 0))));
+        return new CheckPerformTransactionResult(true, new DetailResult(0, List.of(new Item("10701001004000000",
+                "Услуги по аренде жилых и нежилых помещений",
+                orderClient.getAmount(), 1, "1494974", 0))));
     }
 
     @Override
@@ -109,7 +109,7 @@ public class MerchantService implements IMerchantService {
                 OrderHouseEntity order = transaction.getOrder();
                 order.setStatus(Status.ACTIVE);
                 orderRepository.save(order);
-                transportUslugaController.acceptOrder(order.getChatId(), order.getId(), Payment.PAYME);
+                orderHouseController.acceptOrder(order.getChatId(), order.getId(), Payment.PAYME);
 
                 transactionRepository.save(transaction);
                 return new PerformTransactionResult(transaction.getId().toString(), transaction.getPerformTime(), transaction.getState().getCode());
