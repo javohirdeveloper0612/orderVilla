@@ -51,7 +51,6 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
         if (update.hasMessage()) {
 
-
             Message message = update.getMessage();
             TelegramUsers users = saveUser(message.getChatId());
 
@@ -59,7 +58,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 changeStatusOrder.handle();
                 return;
             }
-            mainController.handle(message); //-> MainController
+            mainController.handle(message);
 
             if (message.getChatId() == 123456778L) {
                 adminMainController.handle(update);

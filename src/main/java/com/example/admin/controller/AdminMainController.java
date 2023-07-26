@@ -15,20 +15,14 @@ public class AdminMainController {
     private final AdminMainService adminMainService;
     private final ActiveOrderAdminService activeOrderAdminService;
     private final NoActiveOrderAdminService noActiveOrderAdminService;
-    private final DeleteOrderAdminService deleteOrderAdminService;
-    private final UpdateOrderAdminService updateOrderAdminService;
 
     public AdminMainController(AdminMainService adminMainService,
                                ActiveOrderAdminService activeOrderAdminService,
-                               NoActiveOrderAdminService noActiveOrderAdminService,
-                               DeleteOrderAdminService deleteOrderAdminService,
-                               UpdateOrderAdminService updateOrderAdminService) {
+                               NoActiveOrderAdminService noActiveOrderAdminService) {
 
         this.adminMainService = adminMainService;
         this.activeOrderAdminService = activeOrderAdminService;
         this.noActiveOrderAdminService = noActiveOrderAdminService;
-        this.deleteOrderAdminService = deleteOrderAdminService;
-        this.updateOrderAdminService = updateOrderAdminService;
     }
 
     public void handle(Update update) {
@@ -55,14 +49,6 @@ public class AdminMainController {
                         case AdminButtonName.noActiveOrder -> {
                             noActiveOrderAdminService.noActiveOrder(message);
                             adminUsers.setAdminStep(AdminStep.NOACTIVEORDER);
-                        }
-                        case AdminButtonName.deleteOrder -> {
-                            deleteOrderAdminService.deleteOrder(message);
-                            adminUsers.setAdminStep(AdminStep.DELETEORDER);
-                        }
-                        case AdminButtonName.updateOrder -> {
-                            updateOrderAdminService.updateOrder(message);
-                            adminUsers.setAdminStep(AdminStep.UPDATEORDER);
                         }
                     }
                 }

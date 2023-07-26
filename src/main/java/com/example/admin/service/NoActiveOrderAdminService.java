@@ -1,6 +1,5 @@
 package com.example.admin.service;
 import com.example.myTelegramBot.MyTelegramBot;
-import com.example.util.SendMsg;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -15,7 +14,5 @@ public class NoActiveOrderAdminService {
 
     public void noActiveOrder(Message message) {
 
-        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                "No Active Order Bo'limi ishladi !!!"));
     }
 }

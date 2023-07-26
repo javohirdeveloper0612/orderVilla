@@ -38,6 +38,7 @@ public class OrderHouseService {
 
     // instruction bot
     public void mainMenu(Message message) {
+
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "⬇\uFE0F\n" +
                 "\n" +
                 "- Инструкции бота...\n" +

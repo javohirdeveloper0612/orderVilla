@@ -1,7 +1,9 @@
 package com.example.controller;
 
 
+import com.example.myTelegramBot.MyTelegramBot;
 import com.example.service.OrderHouseService;
+import com.example.util.SendMsg;
 import com.example.util.Step;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
@@ -15,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class CallBackQueryController {
     private final OrderHouseService orderHouseService;
     private final OrderHouseController orderHouseController;
+    private final MyTelegramBot myTelegramBot;
 
     public void handle(Update update) {
 
@@ -25,6 +28,8 @@ public class CallBackQueryController {
 
         switch (parts[0]) {
 
+            case "view_loc1" -> myTelegramBot.send(SendMsg.sendLocation(message.getChatId(),message.getMessageId()));
+            case "view_loc2" -> myTelegramBot.send(SendMsg.sendLocation(message.getChatId(), message.getMessageId()));
             case "next", "cancel" -> orderHouseService.replyStart(message.getChatId(), message.getMessageId());
             case "accept_order_date" -> orderHouseService.getOrderDate(message);
             case "next_to_phone" -> {

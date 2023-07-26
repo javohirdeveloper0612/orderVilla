@@ -27,16 +27,9 @@ public class AdminMainService {
 
                                         Button.button(AdminButtonName.activeOrder),
                                         Button.button(AdminButtonName.noActiveOrder)
-                                ),
 
-                                Button.row(
-
-                                        Button.button(AdminButtonName.deleteOrder),
-                                        Button.button(AdminButtonName.updateOrder)
-
-                                )
                         )
-                )));
+                ))));
 
 
     }

@@ -141,8 +141,34 @@ public class SendMsg {
         editMessageText.setMessageId(messageId);
         editMessageText.setText(text);
         editMessageText.setReplyMarkup(markup);
-
         return editMessageText;
     }
+
+    public static SendLocation sendLocation(Long chatId, Integer messageId) {
+        SendLocation sendLocation = new SendLocation();
+        sendLocation.setChatId(chatId);
+        sendLocation.setLatitude(41.418369);
+        sendLocation.setLongitude(69.568017);
+        sendLocation.setReplyToMessageId(messageId);
+        return sendLocation;
+
+    }
+
+    // -> Villa Photo
+
+    public static SendPhoto sendPhotoVilla(Long id, String pathName, String text) {
+
+        SendPhoto sendPhoto = new SendPhoto();
+
+        InputFile input = new InputFile(new File(pathName));
+
+        sendPhoto.setChatId(id);
+        sendPhoto.setPhoto(input);
+        sendPhoto.setCaption(text);
+
+        return sendPhoto;
+    }
+
+
 
 }

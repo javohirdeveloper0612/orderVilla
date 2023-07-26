@@ -1,10 +1,5 @@
 package com.example.controller;
-
-
-import com.example.service.BotInstructionHouseService;
-import com.example.service.ButtonCommandService;
-import com.example.service.CommandService;
-import com.example.service.MainService;
+import com.example.service.*;
 import com.example.util.ButtonName;
 import com.example.util.Step;
 import com.example.util.TelegramUsers;
@@ -28,8 +23,6 @@ public class MainController {
     private final ButtonCommandService buttonCommandService;
     private final CommandService commandService;
     private final MyOrdersController myOrdersController;
-
-
 
     public void handle(Message message) {
 
@@ -99,7 +92,7 @@ public class MainController {
                     telegramUsers.setStep(Step.DISCOUNTHOUSE);
                 }
                 case ButtonName.photoAndVideoHouse -> {
-                    buttonCommandService.photoAndVideoHouse(message);
+                    buttonCommandService.photoVilla(message);
                     telegramUsers.setStep(Step.PHOTOANDVIDEOHOUSE);
                 }
                 case ButtonName.rulesHouse -> {

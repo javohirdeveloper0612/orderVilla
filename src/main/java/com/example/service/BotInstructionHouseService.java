@@ -1,6 +1,4 @@
 package com.example.service;
-
-
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.util.Button;
 import com.example.util.ButtonName;
@@ -20,6 +18,7 @@ public class BotInstructionHouseService {
     public void botinstruction(Message message) {
 
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
+
                 "⬇️\n" +
                         "\n" +
                         "*- Инструкция бота...*\n" +
@@ -44,7 +43,9 @@ public class BotInstructionHouseService {
                         "\uD83D\uDD35  Через бота вы можете увидеть контакт для связи с" +
                         " управляющими дома, вы можете перейти в раздел контакты, чтобы узнать контакт\n" +
                         "\n" +
-                        "\uD83D\uDD35  Узнать домашний адрес можно через бота, домашний адрес показывается с местоположением",
+                        "\uD83D\uDD35  Узнать домашний адрес можно через бота, домашний адрес показывается " +
+                        "с местоположением",
+
                 Button.markup(
                         Button.rowList(
                                 Button.row(
@@ -54,5 +55,7 @@ public class BotInstructionHouseService {
                                 )
                         )
                 )));
+
+
     }
 }
