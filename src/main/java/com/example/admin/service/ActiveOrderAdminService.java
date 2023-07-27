@@ -18,7 +18,7 @@ public class ActiveOrderAdminService {
     public void activeOrder(Message message) {
 
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                "Active Order Bo'limi ishladi",
+                "",
 
                 Button.markup(
                         Button.rowList(

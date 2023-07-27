@@ -18,7 +18,9 @@ public class AdminMainService {
     public void adminMainMenu(Message message) {
 
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                "",
+                "⬇️\n" +
+                        "\n" +
+                        "*-Выберите нужный вам раздел...*",
                 Button.markup(
 
                         Button.rowList(

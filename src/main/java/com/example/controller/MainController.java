@@ -104,7 +104,7 @@ public class MainController {
                     telegramUsers.setStep(Step.BOTINSTRUCTION);
                 }
                 case ButtonName.contactHouse -> {
-                    buttonCommandService.contactHouse(message);
+                    commandService.contactCommand(message);
                     telegramUsers.setStep(Step.CONTACTHOUSE);
                 }
                 case ButtonName.locationHouse -> {

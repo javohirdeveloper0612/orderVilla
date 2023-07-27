@@ -1,10 +1,12 @@
 package com.example.admin.controller;
+
 import com.example.admin.service.*;
 import com.example.admin.util.AdminButtonName;
 import com.example.admin.util.AdminStep;
 import com.example.admin.util.AdminUsers;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,37 +29,38 @@ public class AdminMainController {
 
     public void handle(Update update) {
 
-        if(update.hasMessage()){
+        if (update.hasMessage()) {
 
             var message = update.getMessage();
             var adminUsers = saveUser(message.getChatId());
             var text = message.getText();
 
-            if(text.equals("/satrt")){
+            if (text.equals("/start")) {
 
                 adminMainService.adminMainMenu(message);
                 adminUsers.setAdminStep(AdminStep.ADMINMAIN);
 
-                if(adminUsers.getAdminStep().equals(AdminStep.ADMINMAIN)){
+            }
 
-                    switch (message.getText()){
+            if (adminUsers.getAdminStep().equals(AdminStep.ADMINMAIN)) {
 
-                        case AdminButtonName.activeOrder -> {
-                            activeOrderAdminService.activeOrder(message);
-                            adminUsers.setAdminStep(AdminStep.ACTIVEORDER);
-                        }
-                        case AdminButtonName.noActiveOrder -> {
-                            noActiveOrderAdminService.noActiveOrder(message);
-                            adminUsers.setAdminStep(AdminStep.NOACTIVEORDER);
-                        }
+                switch (message.getText()) {
+
+                    case AdminButtonName.activeOrder -> {
+                        activeOrderAdminService.activeOrder(message);
+                        adminUsers.setAdminStep(AdminStep.ACTIVEORDER);
                     }
+
+                    case AdminButtonName.noActiveOrder -> {
+                        noActiveOrderAdminService.noActiveOrder(message);
+                        adminUsers.setAdminStep(AdminStep.NOACTIVEORDER);
+                    }
+
                 }
             }
         }
-
-
-
     }
+
 
     public AdminUsers saveUser(Long chatId) {
         for (AdminUsers adminUsers : list) {

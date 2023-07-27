@@ -1,5 +1,4 @@
 package com.example.myTelegramBot;
-
 import com.example.admin.controller.AdminMainController;
 import com.example.config.BotConfig;
 import com.example.controller.CallBackQueryController;
@@ -19,7 +18,6 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
 import java.util.*;
 
 @Component
@@ -35,7 +33,13 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
 
     @Lazy
-    public MyTelegramBot(BotConfig botConfig, MainController mainController, AdminMainController adminMainController, CallBackQueryController queryController, SendNotification sendNotification, ChangeStatusOrder changeStatusOrder) {
+    public MyTelegramBot(BotConfig botConfig,
+                         MainController mainController,
+                         AdminMainController adminMainController,
+                         CallBackQueryController queryController,
+                         SendNotification sendNotification,
+                         ChangeStatusOrder changeStatusOrder) {
+
         this.botConfig = botConfig;
         this.mainController = mainController;
         this.adminMainController = adminMainController;
@@ -58,17 +62,18 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 changeStatusOrder.handle();
                 return;
             }
-            mainController.handle(message);
 
-            if (message.getChatId() == 123456778L) {
+            if(message.getChatId() == 5530157790L){
                 adminMainController.handle(update);
+                return;
             }
+
+            mainController.handle(message);
 
         } else if (update.hasCallbackQuery()) {
             queryController.handle(update);
 
         }
-
 
     }
 

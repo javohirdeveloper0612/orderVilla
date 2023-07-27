@@ -13,27 +13,47 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 public class ButtonCommandService {
     private final MyTelegramBot myTelegramBot;
 
-    public void contactHouse(Message message) {
-
-        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                "Konatkt bo'limi ishladi akalar",
-                Button.markup(
-                        Button.rowList(
-                                Button.row(
-                                        Button.button(
-                                                ButtonName.backMainMenu
-                                        )
-                                )
-                        )
-                )));
-
-
-    }
-
     public void discountHouse(Message message) {
 
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                "Discount House ishladi Chegirmalar",
+                "⬇️\n" +
+                        "\n" +
+                        "*- Скидки и акции...*\n" +
+                        "\n" +
+                        "\uD83D\uDCB8  на 1 день - 2.000.000 сум\n" +
+                        "\uD83D\uDCB8  на 1 неделю - 8.750.000 сум\n" +
+                        "\uD83D\uDCB8  на 1 месяц - 16.000.000 сум\n" +
+                        "\n" +
+                        "*- Цены со скидкой...*\n" +
+                        "\n" +
+                        "\n" +
+                        "*\uD83D\uDCB8 1 день скидки...*\n" +
+                        "\n" +
+                        "\n" +
+                        "\uD83D\uDCC9  1-дневная скидка на дни после 1 недели 750.000 сум\n" +
+                        "\n" +
+                        "\uD83D\uDCB8  вы оплачиваете 1.250.000 сум за 1 день со скидкой\n" +
+                        "\n" +
+                        "\uD83D\uDCC9  Скидка на 1 день для дней, прибывающих после 1 месяца 1.467.000 сум\n" +
+                        "\n" +
+                        "\uD83D\uDCB8  вы оплачиваете 533.000 сум за 1 день со скидкой\n" +
+                        "\n" +
+                        "\n" +
+                        "*\uD83D\uDCB8 скидка на 1 неделю...*\n" +
+                        "\n" +
+                        "\n" +
+                        "\uD83D\uDCC9  Вы получите скидку 5.250.000 сум при бронировании дома на 1 неделю\n" +
+                        "\n" +
+                        "\uD83D\uDCB8  вы заплатите 8 750 000 сум за 1 неделю со скидкой\n" +
+                        "\n" +
+                        "\n" +
+                        "*\uD83D\uDCB8 скидка на 1 месяц...*\n" +
+                        "\n" +
+                        "\n" +
+                        "\uD83D\uDCC9  При бронировании дома на 1 месяц вы получаете скидку 44 000 000 сум\n" +
+                        "\n" +
+                        "\uD83D\uDCB8  Вы заплатите 16 000 сумов за 1 месяц со скидкой",
+
                 Button.markup(
                         Button.rowList(
                                 Button.row(
